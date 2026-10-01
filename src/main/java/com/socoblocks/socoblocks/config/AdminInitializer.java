@@ -1,8 +1,8 @@
-package com.jwtinternalserviceapi.config;
+package com.socoblocks.socoblocks.config;
 
-import com.jwtinternalserviceapi.model.AppUser;
-import com.jwtinternalserviceapi.model.Role;
-import com.jwtinternalserviceapi.repository.AppUserRepository;
+import com.socoblocks.socoblocks.model.AppUser;
+import com.socoblocks.socoblocks.model.Role;
+import com.socoblocks.socoblocks.repository.AppUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;

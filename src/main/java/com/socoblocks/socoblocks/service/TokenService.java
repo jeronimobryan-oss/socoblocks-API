@@ -1,8 +1,8 @@
-package com.jwtinternalserviceapi.service;
+package com.socoblocks.socoblocks.service;
 
-import com.jwtinternalserviceapi.dto.LoginRequest;
-import com.jwtinternalserviceapi.dto.TokenResponse;
-import com.jwtinternalserviceapi.security.JwtService;
+import com.socoblocks.socoblocks.dto.LoginRequest;
+import com.socoblocks.socoblocks.dto.TokenResponse;
+import com.socoblocks.socoblocks.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

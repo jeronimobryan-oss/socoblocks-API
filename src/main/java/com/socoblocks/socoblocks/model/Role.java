@@ -1,4 +1,4 @@
-package com.jwtinternalserviceapi.model;
+package com.socoblocks.socoblocks.model;
 
 public enum Role {
     USER,

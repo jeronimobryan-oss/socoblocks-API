@@ -1,11 +1,11 @@
-package com.jwtinternalserviceapi.controller;
+package com.socoblocks.socoblocks.controller;
 
-import com.jwtinternalserviceapi.dto.LoginRequest;
-import com.jwtinternalserviceapi.dto.RegisterRequest;
-import com.jwtinternalserviceapi.dto.TokenResponse;
-import com.jwtinternalserviceapi.dto.UserResponse;
-import com.jwtinternalserviceapi.service.AuthService;
-import com.jwtinternalserviceapi.service.TokenService;
+import com.socoblocks.socoblocks.dto.LoginRequest;
+import com.socoblocks.socoblocks.dto.RegisterRequest;
+import com.socoblocks.socoblocks.dto.TokenResponse;
+import com.socoblocks.socoblocks.dto.UserResponse;
+import com.socoblocks.socoblocks.service.AuthService;
+import com.socoblocks.socoblocks.service.TokenService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

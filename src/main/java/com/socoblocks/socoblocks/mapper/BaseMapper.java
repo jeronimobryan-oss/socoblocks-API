@@ -1,4 +1,4 @@
-package com.jwtinternalserviceapi.mapper;
+package com.socoblocks.socoblocks.mapper;
 
 public interface BaseMapper <T,D>{
 

@@ -1,4 +1,4 @@
-package com.jwtinternalserviceapi.config;
+package com.socoblocks.socoblocks.config;
 
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

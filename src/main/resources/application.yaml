@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: socoblocks
+  datasource:
+    url: jdbc:postgresql://localhost:5432/socoblocks
+    username: socoblocks
+    password: socoblocks_password
+  jpa:
+    hibernate:
+      ddl-auto: update
+app:
+  jwt:
+    # Base64 de al menos 32 bytes (256 bits) para HS256. Generar otro con: openssl rand -base64 32
+    secret: I8Y3Hr8n5ciTbjXZ4Eck+qiooOv4nuZekmWPAhQMSaE=
+    expiration: 1h
+    issuer: socoblocks
+  admin:
+    username: admin
+    password: change-me

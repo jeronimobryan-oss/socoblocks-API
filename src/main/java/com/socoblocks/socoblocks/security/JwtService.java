@@ -1,6 +1,6 @@
-package com.jwtinternalserviceapi.security;
+package com.socoblocks.socoblocks.security;
 
-import com.jwtinternalserviceapi.config.JwtProperties;
+import com.socoblocks.socoblocks.config.JwtProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;

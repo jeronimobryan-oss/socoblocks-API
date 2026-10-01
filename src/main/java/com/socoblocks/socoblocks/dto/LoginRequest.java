@@ -1,4 +1,4 @@
-package com.jwtinternalserviceapi.dto;
+package com.socoblocks.socoblocks.dto;
 
 import jakarta.validation.constraints.NotBlank;
 

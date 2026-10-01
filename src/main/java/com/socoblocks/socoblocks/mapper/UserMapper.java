@@ -1,7 +1,7 @@
-package com.jwtinternalserviceapi.mapper;
+package com.socoblocks.socoblocks.mapper;
 
-import com.jwtinternalserviceapi.dto.UserResponse;
-import com.jwtinternalserviceapi.model.AppUser;
+import com.socoblocks.socoblocks.dto.UserResponse;
+import com.socoblocks.socoblocks.model.AppUser;
 import org.springframework.stereotype.Service;
 
 @Service

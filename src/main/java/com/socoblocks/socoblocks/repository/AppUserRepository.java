@@ -1,6 +1,6 @@
-package com.jwtinternalserviceapi.repository;
+package com.socoblocks.socoblocks.repository;
 
-import com.jwtinternalserviceapi.model.AppUser;
+import com.socoblocks.socoblocks.model.AppUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

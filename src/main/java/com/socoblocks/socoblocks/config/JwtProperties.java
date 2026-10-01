@@ -1,4 +1,4 @@
-package com.jwtinternalserviceapi.config;
+package com.socoblocks.socoblocks.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

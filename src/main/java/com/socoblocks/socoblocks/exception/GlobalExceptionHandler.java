@@ -1,4 +1,4 @@
-package com.jwtinternalserviceapi.exception;
+package com.socoblocks.socoblocks.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

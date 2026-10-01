@@ -1,6 +1,5 @@
-package com.jwtinternalserviceapi.dto;
+package com.socoblocks.socoblocks.dto;
 
-import com.jwtinternalserviceapi.model.AppUser;
-import com.jwtinternalserviceapi.model.Role;
+import com.socoblocks.socoblocks.model.Role;
 
 public record UserResponse(Long id, String username, Role role) { }

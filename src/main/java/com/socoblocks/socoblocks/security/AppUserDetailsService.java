@@ -1,6 +1,6 @@
-package com.jwtinternalserviceapi.security;
+package com.socoblocks.socoblocks.security;
 
-import com.jwtinternalserviceapi.repository.AppUserRepository;
+import com.socoblocks.socoblocks.repository.AppUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;

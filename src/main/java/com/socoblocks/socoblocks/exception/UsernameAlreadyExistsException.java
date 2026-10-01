@@ -1,4 +1,4 @@
-package com.jwtinternalserviceapi.exception;
+package com.socoblocks.socoblocks.exception;
 
 public class UsernameAlreadyExistsException extends RuntimeException {
 

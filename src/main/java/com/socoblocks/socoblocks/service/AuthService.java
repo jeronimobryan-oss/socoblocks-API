@@ -1,23 +1,16 @@
-package com.jwtinternalserviceapi.service;
+package com.socoblocks.socoblocks.service;
 
-import com.jwtinternalserviceapi.dto.LoginRequest;
-import com.jwtinternalserviceapi.dto.RegisterRequest;
-import com.jwtinternalserviceapi.dto.TokenResponse;
-import com.jwtinternalserviceapi.dto.UserResponse;
-import com.jwtinternalserviceapi.exception.UsernameAlreadyExistsException;
-import com.jwtinternalserviceapi.mapper.BaseMapper;
-import com.jwtinternalserviceapi.model.AppUser;
-import com.jwtinternalserviceapi.model.Role;
-import com.jwtinternalserviceapi.repository.AppUserRepository;
-import com.jwtinternalserviceapi.security.JwtService;
+import com.socoblocks.socoblocks.dto.RegisterRequest;
+import com.socoblocks.socoblocks.dto.UserResponse;
+import com.socoblocks.socoblocks.exception.UsernameAlreadyExistsException;
+import com.socoblocks.socoblocks.mapper.BaseMapper;
+import com.socoblocks.socoblocks.model.AppUser;
+import com.socoblocks.socoblocks.model.Role;
+import com.socoblocks.socoblocks.repository.AppUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor

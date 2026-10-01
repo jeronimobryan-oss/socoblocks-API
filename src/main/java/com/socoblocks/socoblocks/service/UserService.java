@@ -1,11 +1,9 @@
-package com.jwtinternalserviceapi.service;
+package com.socoblocks.socoblocks.service;
 
-import com.jwtinternalserviceapi.dto.UserResponse;
-import com.jwtinternalserviceapi.exception.UserNotFoundException;
-import com.jwtinternalserviceapi.mapper.BaseMapper;
-import com.jwtinternalserviceapi.model.AppUser;
-import com.jwtinternalserviceapi.model.Role;
-import com.jwtinternalserviceapi.repository.AppUserRepository;
+import com.socoblocks.socoblocks.dto.UserResponse;
+import com.socoblocks.socoblocks.mapper.BaseMapper;
+import com.socoblocks.socoblocks.model.AppUser;
+import com.socoblocks.socoblocks.repository.AppUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
