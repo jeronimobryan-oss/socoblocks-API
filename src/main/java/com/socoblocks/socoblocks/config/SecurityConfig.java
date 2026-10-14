@@ -26,6 +26,8 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 
+import static org.springframework.security.oauth2.jwt.JwtTypeValidator.jwt;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -38,9 +40,19 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        //Rutas publicas para los visitantes
                         .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register").permitAll()
                         .requestMatchers("/error").permitAll()
-                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
+
+                        //permitir lectura a visitantes
+                        .requestMatchers(HttpMethod.GET, "/api/productos/**","/api/catalogo/**").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/compras/invitado").permitAll()
+
+                        //Rutas privadas con roles
+                        .requestMatchers("/api/vendedor/**").hasRole ("VENDEDOR")
+                        .requestMatchers("/api/coleccionista/**").hasRole("COLECCIONISTA")
+
+                        // Cualquier otra ruta (ej. comentar, ver perfil) requiere estar autenticado
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
