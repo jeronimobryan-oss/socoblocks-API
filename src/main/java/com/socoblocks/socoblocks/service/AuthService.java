@@ -24,10 +24,12 @@ public class AuthService {
         if (repository.existsByUsername(request.username())) {
             throw new UsernameAlreadyExistsException(request.username());
         }
+        //Evalua el rol enviado del dt, si viene null asigna coleccionista
+        Role assignedRole = (request.role()!=null)? request.role() : Role.COLECCIONISTA;
         try {
             AppUser user = new AppUser(request.username(),
                     passwordEncoder.encode(request.password()),
-                    Role.USER);
+                    Role.COLECCIONISTA);
             return mapper.mapEntityToDTO(repository.saveAndFlush(user));
         } catch (DataIntegrityViolationException e) {
             throw new UsernameAlreadyExistsException(request.username());
