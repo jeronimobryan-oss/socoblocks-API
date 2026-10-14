@@ -1,0 +1,345 @@
+{
+  "info": {
+    "name": "Socoblocks - Pruebas de Autenticación JWT",
+    "description": "Colección para verificar el flujo completo de autenticación (registro, login, acceso a endpoints protegidos y validación de JWT) de socoblocks-API. Ejecutar en orden con el Collection Runner.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "username", "value": "" },
+    { "key": "password", "value": "Password123!" },
+    { "key": "accessToken", "value": "" },
+    { "key": "tamperedToken", "value": "" },
+    { "key": "adminUsername", "value": "admin" },
+    { "key": "adminPassword", "value": "change-me" },
+    { "key": "adminAccessToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Registro - usuario nuevo (201)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set('username', 'testuser_' + Date.now());"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+              "const body = pm.response.json();",
+              "pm.test('Devuelve username correcto', () => pm.expect(body.username).to.eql(pm.collectionVariables.get('username')));",
+              "pm.test('Rol asignado es USER', () => pm.expect(body.role).to.eql('USER'));",
+              "pm.test('No se expone el password en la respuesta', () => pm.expect(body.password).to.be.undefined);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] }
+      }
+    },
+    {
+      "name": "2. Registro - username duplicado (409)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));",
+              "pm.test('Mensaje indica username ya existente', () => pm.expect(pm.response.text()).to.match(/already taken/i));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] }
+      }
+    },
+    {
+      "name": "3. Registro - password muy corta (400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"otro_usuario_{{$timestamp}}\",\n  \"password\": \"123\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] }
+      }
+    },
+    {
+      "name": "4. Login - credenciales válidas (200)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('Devuelve accessToken no vacío', () => pm.expect(body.accessToken).to.be.a('string').and.not.empty);",
+              "pm.test('tokenType es Bearer', () => pm.expect(body.tokenType).to.eql('Bearer'));",
+              "pm.test('expiresIn es numérico y positivo', () => pm.expect(body.expiresIn).to.be.a('number').and.above(0));",
+              "pm.test('El token tiene 3 segmentos (header.payload.signature)', () => pm.expect(body.accessToken.split('.').length).to.eql(3));",
+              "pm.collectionVariables.set('accessToken', body.accessToken);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+      }
+    },
+    {
+      "name": "5. Login - password incorrecto (401)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 401 Unauthorized', () => pm.response.to.have.status(401));",
+              "pm.test('Mensaje genérico de credenciales inválidas', () => pm.expect(pm.response.text()).to.match(/Invalid username or password/i));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"ClaveIncorrecta999!\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+      }
+    },
+    {
+      "name": "6. Login - usuario inexistente (401)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 401 Unauthorized', () => pm.response.to.have.status(401));",
+              "pm.test('No revela que el usuario no existe (mismo mensaje genérico)', () => pm.expect(pm.response.text()).to.match(/Invalid username or password/i));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"usuario_que_no_existe_{{$timestamp}}\",\n  \"password\": \"CualquierClave123!\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+      }
+    },
+    {
+      "name": "7. GET /me sin token (401)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 401 Unauthorized', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/api/user/me", "host": ["{{baseUrl}}"], "path": ["api", "user", "me"] }
+      }
+    },
+    {
+      "name": "8. GET /me con token válido (200)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('username coincide con el usuario logueado', () => pm.expect(body.username).to.eql(pm.collectionVariables.get('username')));",
+              "pm.test('role es USER', () => pm.expect(body.role).to.eql('USER'));",
+              "pm.test('expiresAt está presente', () => pm.expect(body.expiresAt).to.not.be.undefined);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+        "url": { "raw": "{{baseUrl}}/api/user/me", "host": ["{{baseUrl}}"], "path": ["api", "user", "me"] }
+      }
+    },
+    {
+      "name": "9. GET /me con token manipulado - firma inválida (401)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const token = pm.collectionVariables.get('accessToken');",
+              "if (token) {",
+              "  const parts = token.split('.');",
+              "  const sig = parts[2];",
+              "  const last = sig.charAt(sig.length - 1);",
+              "  const swapped = last === 'A' ? 'B' : 'A';",
+              "  parts[2] = sig.slice(0, -1) + swapped;",
+              "  pm.collectionVariables.set('tamperedToken', parts.join('.'));",
+              "}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 401 Unauthorized (firma no válida)', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{tamperedToken}}" }],
+        "url": { "raw": "{{baseUrl}}/api/user/me", "host": ["{{baseUrl}}"], "path": ["api", "user", "me"] }
+      }
+    },
+    {
+      "name": "10. GET /me con token mal formado (401)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 401 Unauthorized', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer esto-no-es-un-jwt-valido" }],
+        "url": { "raw": "{{baseUrl}}/api/user/me", "host": ["{{baseUrl}}"], "path": ["api", "user", "me"] }
+      }
+    },
+    {
+      "name": "11. Login - admin inicial (200)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('Devuelve accessToken', () => pm.expect(body.accessToken).to.be.a('string').and.not.empty);",
+              "pm.collectionVariables.set('adminAccessToken', body.accessToken);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{adminUsername}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+      }
+    },
+    {
+      "name": "12. GET /me con token admin - rol ADMIN (200)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('username es admin', () => pm.expect(body.username).to.eql(pm.collectionVariables.get('adminUsername')));",
+              "pm.test('role es ADMIN', () => pm.expect(body.role).to.eql('ADMIN'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminAccessToken}}" }],
+        "url": { "raw": "{{baseUrl}}/api/user/me", "host": ["{{baseUrl}}"], "path": ["api", "user", "me"] }
+      }
+    },
+    {
+      "name": "13. GET /me con token de un usuario usado para otro (cross-check username)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('El token del usuario normal NO devuelve datos del admin', () => pm.expect(body.username).to.not.eql(pm.collectionVariables.get('adminUsername')));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+        "url": { "raw": "{{baseUrl}}/api/user/me", "host": ["{{baseUrl}}"], "path": ["api", "user", "me"] }
+      }
+    }
+  ]
+}
