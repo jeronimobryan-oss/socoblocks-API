@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: socoblocks-db
+    environment:
+      POSTGRES_DB: socoblocks
+      POSTGRES_USER: socoblocks
+      POSTGRES_PASSWORD: socoblocks_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - socoblocks-data:/var/lib/postgresql/data
+
+volumes:
+  socoblocks-data:
