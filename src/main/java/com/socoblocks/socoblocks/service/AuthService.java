@@ -8,11 +8,15 @@ import com.socoblocks.socoblocks.model.AppUser;
 import com.socoblocks.socoblocks.model.Role;
 import com.socoblocks.socoblocks.repository.AppUserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class AuthService {
 
@@ -21,17 +25,19 @@ public class AuthService {
     private final BaseMapper<AppUser, UserResponse> mapper;
 
     public UserResponse register(RegisterRequest request) {
-        if (repository.existsByUsername(request.username())) {
-            throw new UsernameAlreadyExistsException(request.username());
+        Role assignedRole = (request.role() != null) ? request.role() : Role.COLECCIONISTA;
+
+        if (assignedRole == Role.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rol no permitido");
         }
-        //Evalua el rol enviado del dt, si viene null asigna coleccionista
-        Role assignedRole = (request.role()!=null)? request.role() : Role.COLECCIONISTA;
+
         try {
             AppUser user = new AppUser(request.username(),
                     passwordEncoder.encode(request.password()),
-                    Role.COLECCIONISTA);
+                    assignedRole);
             return mapper.mapEntityToDTO(repository.saveAndFlush(user));
         } catch (DataIntegrityViolationException e) {
+            log.error("Error al registrar usuario", e.getMostSpecificCause());
             throw new UsernameAlreadyExistsException(request.username());
         }
     }

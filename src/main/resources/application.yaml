@@ -7,7 +7,7 @@ spring:
     password: socoblocks_password
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
 app:
   jwt:
     # Base64 de al menos 32 bytes (256 bits) para HS256. Generar otro con: openssl rand -base64 32
