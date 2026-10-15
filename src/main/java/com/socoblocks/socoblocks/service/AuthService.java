@@ -30,6 +30,9 @@ public class AuthService {
         if (assignedRole == Role.ADMIN) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rol no permitido");
         }
+        if (repository.existsByUsername(request.username())) {
+            throw new UsernameAlreadyExistsException(request.username());
+        }
 
         try {
             AppUser user = new AppUser(request.username(),
