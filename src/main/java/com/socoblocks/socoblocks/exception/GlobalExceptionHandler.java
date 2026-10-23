@@ -23,4 +23,32 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleUserNotFound(UserNotFoundException ex) {
         return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(ProductNotFoundException.class)
+    public ResponseEntity<String> handleProductNotFound(
+            ProductNotFoundException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(OutOfStockException.class)
+    public ResponseEntity<String> handleOutOfStock(
+            OutOfStockException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(CartItemNotFoundException.class)
+    public ResponseEntity<String> handleCartItemNotFound(
+            CartItemNotFoundException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ex.getMessage());
+    }
+
 }
