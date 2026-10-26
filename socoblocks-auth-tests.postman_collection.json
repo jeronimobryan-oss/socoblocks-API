@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "Socoblocks - Pruebas de Autenticación JWT",
-    "description": "Colección para verificar el flujo completo de autenticación (registro, login, acceso a endpoints protegidos y validación de JWT) de socoblocks-API. Ejecutar en orden con el Collection Runner.",
+    "name": "Socoblocks - Pruebas de Autenticación JWT y Carrito",
+    "description": "Colección para verificar el flujo completo de autenticación (registro, login, acceso a endpoints protegidos y validación de JWT) y del carrito de compras (RF-008 a RF-011: agregar, consultar, actualizar y eliminar productos) de socoblocks-API. Requiere los productos semilla de ProductInitializer: productId=1 (stock 5) y outOfStockProductId=2 (stock 0). Ejecutar en orden con el Collection Runner.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -12,7 +12,12 @@
     { "key": "tamperedToken", "value": "" },
     { "key": "adminUsername", "value": "admin" },
     { "key": "adminPassword", "value": "change-me" },
-    { "key": "adminAccessToken", "value": "" }
+    { "key": "adminAccessToken", "value": "" },
+    { "key": "productId", "value": "1" },
+    { "key": "outOfStockProductId", "value": "2" },
+    { "key": "cartItemId", "value": "" },
+    { "key": "username2", "value": "" },
+    { "key": "accessToken2", "value": "" }
   ],
   "item": [
     {
@@ -339,6 +344,1068 @@
         "method": "GET",
         "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
         "url": { "raw": "{{baseUrl}}/api/user/me", "host": ["{{baseUrl}}"], "path": ["api", "user", "me"] }
+      }
+    },
+    {
+      "name": "14. GET /carrito sin token (401)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 401 Unauthorized', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "carrito"
+          ]
+        }
+      }
+    },
+    {
+      "name": "15. GET /carrito vacío - usuario sin carrito (200)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('items es una lista vacía', () => pm.expect(body.items).to.be.an('array').that.is.empty);",
+              "pm.test('totalItems es 0', () => pm.expect(body.totalItems).to.eql(0));",
+              "pm.test('total es 0', () => pm.expect(Number(body.total)).to.eql(0));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "carrito"
+          ]
+        }
+      }
+    },
+    {
+      "name": "16. POST /carrito/items sin token (401)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 401 Unauthorized', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": {{productId}},\n  \"quantity\": 1\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito/items",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "carrito",
+            "items"
+          ]
+        }
+      }
+    },
+    {
+      "name": "17. POST /carrito/items - agregar producto (201)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+              "const body = pm.response.json();",
+              "pm.test('El carrito tiene una línea', () => pm.expect(body.items).to.have.lengthOf(1));",
+              "const line = body.items[0];",
+              "pm.test('La línea corresponde al producto agregado', () => pm.expect(String(line.productId)).to.eql(String(pm.collectionVariables.get('productId'))));",
+              "pm.test('Cantidad es 2', () => pm.expect(line.quantity).to.eql(2));",
+              "pm.test('subtotal = unitPrice * quantity', () => pm.expect(Number(line.subtotal)).to.be.closeTo(Number(line.unitPrice) * 2, 0.001));",
+              "pm.test('totalItems es 2', () => pm.expect(body.totalItems).to.eql(2));",
+              "pm.test('total coincide con el subtotal', () => pm.expect(Number(body.total)).to.be.closeTo(Number(line.subtotal), 0.001));",
+              "pm.collectionVariables.set('cartItemId', line.itemId);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": {{productId}},\n  \"quantity\": 2\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito/items",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "carrito",
+            "items"
+          ]
+        }
+      }
+    },
+    {
+      "name": "18. POST /carrito/items - mismo producto acumula cantidad (201)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+              "const body = pm.response.json();",
+              "pm.test('Sigue habiendo una sola línea', () => pm.expect(body.items).to.have.lengthOf(1));",
+              "pm.test('Cantidad acumulada es 3', () => pm.expect(body.items[0].quantity).to.eql(3));",
+              "pm.test('Se conserva el mismo itemId', () => pm.expect(String(body.items[0].itemId)).to.eql(String(pm.collectionVariables.get('cartItemId'))));",
+              "pm.test('totalItems es 3', () => pm.expect(body.totalItems).to.eql(3));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": {{productId}},\n  \"quantity\": 1\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito/items",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "carrito",
+            "items"
+          ]
+        }
+      }
+    },
+    {
+      "name": "19. POST /carrito/items - sin quantity usa 1 por defecto (201)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+              "const body = pm.response.json();",
+              "pm.test('Cantidad acumulada es 4 (3 + 1 por defecto)', () => pm.expect(body.items[0].quantity).to.eql(4));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": {{productId}}\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito/items",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "carrito",
+            "items"
+          ]
+        }
+      }
+    },
+    {
+      "name": "20. POST /carrito/items - excede el stock acumulado (409)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));",
+              "pm.test('Mensaje indica stock insuficiente', () => pm.expect(pm.response.text()).to.match(/Not enough stock/i));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": {{productId}},\n  \"quantity\": 5\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito/items",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "carrito",
+            "items"
+          ]
+        }
+      }
+    },
+    {
+      "name": "21. POST /carrito/items - producto sin stock (409)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));",
+              "pm.test('Mensaje indica stock insuficiente', () => pm.expect(pm.response.text()).to.match(/Not enough stock/i));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": {{outOfStockProductId}},\n  \"quantity\": 1\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito/items",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "carrito",
+            "items"
+          ]
+        }
+      }
+    },
+    {
+      "name": "22. POST /carrito/items - producto inexistente (404)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 404 Not Found', () => pm.response.to.have.status(404));",
+              "pm.test('Mensaje indica producto no encontrado', () => pm.expect(pm.response.text()).to.match(/Product not found/i));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": 999999,\n  \"quantity\": 1\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito/items",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "carrito",
+            "items"
+          ]
+        }
+      }
+    },
+    {
+      "name": "23. POST /carrito/items - quantity 0 (400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": {{productId}},\n  \"quantity\": 0\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito/items",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "carrito",
+            "items"
+          ]
+        }
+      }
+    },
+    {
+      "name": "24. POST /carrito/items - sin productId (400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"quantity\": 1\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito/items",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "carrito",
+            "items"
+          ]
+        }
+      }
+    },
+    {
+      "name": "25. GET /carrito - totales calculados (200)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('Hay una línea con cantidad 4', () => { pm.expect(body.items).to.have.lengthOf(1); pm.expect(body.items[0].quantity).to.eql(4); });",
+              "pm.test('Cada línea trae los campos esperados', () => pm.expect(body.items[0]).to.include.all.keys('itemId', 'productId', 'productName', 'unitPrice', 'quantity', 'subtotal'));",
+              "pm.test('totalItems es 4', () => pm.expect(body.totalItems).to.eql(4));",
+              "const sum = body.items.reduce((a, i) => a + Number(i.subtotal), 0);",
+              "pm.test('total es la suma de los subtotales', () => pm.expect(Number(body.total)).to.be.closeTo(sum, 0.001));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "carrito"
+          ]
+        }
+      }
+    },
+    {
+      "name": "26. PUT /carrito/items/{id} - reemplaza la cantidad (200)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('La cantidad se reemplaza (no se suma): 1', () => pm.expect(body.items[0].quantity).to.eql(1));",
+              "pm.test('totalItems es 1', () => pm.expect(body.totalItems).to.eql(1));",
+              "pm.test('total = unitPrice * 1', () => pm.expect(Number(body.total)).to.be.closeTo(Number(body.items[0].unitPrice), 0.001));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"quantity\": 1\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito/items/{{cartItemId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "carrito",
+            "items",
+            "{{cartItemId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "27. PUT /carrito/items/{id} - excede el stock (409)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));",
+              "pm.test('Mensaje indica stock insuficiente', () => pm.expect(pm.response.text()).to.match(/Not enough stock/i));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"quantity\": 6\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito/items/{{cartItemId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "carrito",
+            "items",
+            "{{cartItemId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "28. PUT /carrito/items/{id} - quantity 0 (400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"quantity\": 0\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito/items/{{cartItemId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "carrito",
+            "items",
+            "{{cartItemId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "29. PUT /carrito/items/{id} - sin quantity (400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito/items/{{cartItemId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "carrito",
+            "items",
+            "{{cartItemId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "30. PUT /carrito/items/{id} - línea inexistente (404)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 404 Not Found', () => pm.response.to.have.status(404));",
+              "pm.test('Mensaje indica línea no encontrada', () => pm.expect(pm.response.text()).to.match(/Cart item not found/i));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"quantity\": 1\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito/items/999999",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "carrito",
+            "items",
+            "999999"
+          ]
+        }
+      }
+    },
+    {
+      "name": "31. PUT /carrito/items/{id} sin token (401)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 401 Unauthorized', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"quantity\": 1\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito/items/{{cartItemId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "carrito",
+            "items",
+            "{{cartItemId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "32. Registro - segundo usuario para prueba de aislamiento (201)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set('username2', 'testuser2_' + Date.now());"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 201 Created', () => pm.response.to.have.status(201));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{username2}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/register",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "register"
+          ]
+        }
+      }
+    },
+    {
+      "name": "33. Login - segundo usuario (200)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+              "pm.collectionVariables.set('accessToken2', pm.response.json().accessToken);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{username2}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "34. PUT /carrito/items/{id} - línea de otro usuario (404)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 404 Not Found', () => pm.response.to.have.status(404));",
+              "pm.test('No permite modificar el carrito de otro usuario', () => pm.expect(pm.response.text()).to.match(/Cart item not found/i));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken2}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"quantity\": 1\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito/items/{{cartItemId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "carrito",
+            "items",
+            "{{cartItemId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "35. DELETE /carrito/items/{id} - línea de otro usuario (404)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 404 Not Found', () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken2}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito/items/{{cartItemId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "carrito",
+            "items",
+            "{{cartItemId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "36. DELETE /carrito/items/{id} sin token (401)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 401 Unauthorized', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito/items/{{cartItemId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "carrito",
+            "items",
+            "{{cartItemId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "37. DELETE /carrito/items/{id} - eliminar línea (200)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('El carrito queda sin líneas', () => pm.expect(body.items).to.be.an('array').that.is.empty);",
+              "pm.test('totalItems es 0', () => pm.expect(body.totalItems).to.eql(0));",
+              "pm.test('total es 0', () => pm.expect(Number(body.total)).to.eql(0));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito/items/{{cartItemId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "carrito",
+            "items",
+            "{{cartItemId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "38. DELETE /carrito/items/{id} - línea ya eliminada (404)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 404 Not Found', () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito/items/{{cartItemId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "carrito",
+            "items",
+            "{{cartItemId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "39. GET /carrito - vacío tras eliminar (200)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('items vacío', () => pm.expect(body.items).to.be.empty);",
+              "pm.test('total es 0', () => pm.expect(Number(body.total)).to.eql(0));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "carrito"
+          ]
+        }
       }
     }
   ]

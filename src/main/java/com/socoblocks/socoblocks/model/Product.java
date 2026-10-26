@@ -24,13 +24,37 @@ public class Product {
     @Column(nullable = false)
     private BigDecimal price;
 
+    @Column(nullable = false, length = 2000)
+    private String description;
+
+    @Column(nullable = false)
+    private String imageUrl;
+
+    @Column(nullable = false)
+    private int pieceCount;
+
+    @Column(nullable = false)
+    private boolean active;
+
     @Column(nullable = false)
     private int stock;
 
-    //Constructor para agregar porductos de prueba
-    public Product(String name, BigDecimal price, int stock) {
+    @Column(nullable = false)
+    private Category category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seller_id")
+    private AppUser seller;
+
+    //Constructor para agregar productos
+    public Product(String name, BigDecimal price, int stock, String description, String imageUrl, int pieceCount, boolean active, Category category) {
         this.name = name;
         this.price = price;
         this.stock = stock;
+        this.description = description;
+        this.imageUrl = imageUrl;
+        this.pieceCount = pieceCount;
+        this.active = active;
+        this.category = category;
     }
 }
