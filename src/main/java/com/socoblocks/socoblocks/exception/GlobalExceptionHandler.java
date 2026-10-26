@@ -75,5 +75,4 @@ public class GlobalExceptionHandler {
         log.error("Error no controlado", ex);
         return build(HttpStatus.INTERNAL_SERVER_ERROR, "Ups! Ha ocurrido un error inesperado");
     }
-
 }
