@@ -40,7 +40,7 @@ public class CartService {
 
         //Validar que haya stock
         if (product.getStock() <= 0) {
-            throw new OutOfStockException(product.getName());
+            throw new OutOfStockException(product.getName(), 0);
         }
 
         //Obtener o crear el carrito
@@ -58,11 +58,12 @@ public class CartService {
                 .map(CartItem::getQuantity)
                 .orElse(0);
 
+        //Lo que todavía se puede agregar, restando lo que ya está en el carrito
         if (currentQuantity + request.quantity() > product.getStock()) {
-            throw new OutOfStockException(product.getName());
+            throw new OutOfStockException(product.getName(), product.getStock() - currentQuantity);
         }
 
-        //gregar el producto, guardar y responder
+        //Agregar el producto, guardar y responder
         cart.addItem(product, request.quantity());
 
         Cart savedCart = cartRepository.save(cart);
@@ -87,7 +88,7 @@ public class CartService {
         // Validar la nueva cantidad contra el stock
         Product product = item.getProduct();
         if (request.quantity() > product.getStock()) {
-            throw new OutOfStockException(product.getName());
+            throw new OutOfStockException(product.getName(), product.getStock());
         }
 
         // Aquí la cantidad se REEMPLAZA (en el POST se suma)
