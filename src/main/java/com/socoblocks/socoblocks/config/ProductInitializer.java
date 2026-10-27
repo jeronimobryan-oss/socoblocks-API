@@ -27,6 +27,11 @@ public class ProductInitializer implements ApplicationRunner {
                             new BigDecimal("899.00"), 5, 1200, "https://example.com/cetys.png", true, Category.CLASICO_INTERNET)
             );
 
+            productRepository.save(
+                    createProduct("viral 2010", "Recrea el momento del video del gato en el piano",
+                            new BigDecimal("399.00"), 8, 450, "https://example.com/viral.png", true,  Category.CLASICO_INTERNET)
+            );
+
             // Activo sin stock (para probar disponible=false y OutOfStock en el carrito)
             productRepository.save(
                     createProduct("casa de aimep3", "Set de prueba de la casa de aimep3",
