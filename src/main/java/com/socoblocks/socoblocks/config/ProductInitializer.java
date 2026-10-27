@@ -21,28 +21,27 @@ public class ProductInitializer implements ApplicationRunner {
 
         if (productRepository.count() == 0) {
 
-            // Activo con stock
             productRepository.save(
-                    createProduct("cetys", "Set de prueba del campus CETYS",
-                            new BigDecimal("899.00"), 5, 1200, "https://example.com/cetys.png", true, Category.CLASICO_INTERNET)
+                    createProduct("El Cacahuatazo", "El choque accidental en pleno programa en vivo. Incluye podio de conductor y botarga en minifigura con cabeza intercambiable.",
+                            new BigDecimal("550.00"), 25, 180, "https://res.cloudinary.com/drnyuznhx/image/upload/v1793132874/Screenshot_2026-10-27_132708_lr1bfb.png", true, Category.TV_NACIONAL)
             );
 
             productRepository.save(
-                    createProduct("viral 2010", "Recrea el momento del video del gato en el piano",
-                            new BigDecimal("399.00"), 8, 450, "https://example.com/viral.png", true,  Category.CLASICO_INTERNET)
+                    createProduct("Se Vale: La Tirolesa", "El clásico momento del foro televisivo matutino con la tirolesa colgante que no frenó, cámaras de estudio y minifiguras de conductores despavoridos.",
+                            new BigDecimal("1150.00"), 3, 420, "https://res.cloudinary.com/drnyuznhx/image/upload/v1793132926/copy_of_screenshot_2026-10-27_132700_qa7hys.png", true, Category.TV_NACIONAL)
             );
 
-            // Activo sin stock (para probar disponible=false y OutOfStock en el carrito)
+            // Agotado (stock 0)
             productRepository.save(
-                    createProduct("casa de aimep3", "Set de prueba de la casa de aimep3",
-                            new BigDecimal("499.00"), 0, 650, "https://example.com/aimep3.png", true, Category.CLASICO_INTERNET)
+                    createProduct("El Ferras", "El célebre relato nocturno en Veracruz. Incluye minifigura con cadena dorada, celda desmontable y micro-periódico de noticias.",
+                            new BigDecimal("650.00"), 0, 200, "https://res.cloudinary.com/drnyuznhx/image/upload/v1793132874/Screenshot_2026-10-27_132635_kptpw1.png", true, Category.ENTREVISTAS)
             );
 
-            // Inactivo (NO debe aparecer en GET /api/catalogo)
             productRepository.save(
-                    createProduct("set inactivo", "Set desactivado, no debe verse en el catálogo",
-                            new BigDecimal("299.00"), 10, 300, "https://example.com/inactivo.png", false, Category.CLASICO_INTERNET)
+                    createProduct("La caída de Edgar", "Reconstruye el puente rústico sobre el río de San Carlos, el momento exacto donde Edgar suplica clemencia y el fatídico chapuzón con piezas de agua translúcida.",
+                            new BigDecimal("899.00"), 15, 350, "https://res.cloudinary.com/drnyuznhx/image/upload/v1793132874/Screenshot_2026-10-27_132649_dgtdmx.png", true, Category.CLASICO_INTERNET)
             );
+
         }
     }
 
