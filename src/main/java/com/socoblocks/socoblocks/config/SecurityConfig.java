@@ -1,6 +1,7 @@
 package com.socoblocks.socoblocks.config;
 
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
+import com.socoblocks.socoblocks.model.Role;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,7 +41,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        //Rutas publicas para los visitantes
+                        //Rutas públicas para los visitantes
                         .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register").permitAll()
                         .requestMatchers("/error").permitAll()
 
@@ -49,8 +50,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,"/api/compras/invitado").permitAll()
 
                         //Rutas privadas con roles
-                        .requestMatchers("/api/vendedor/**").hasRole ("VENDEDOR")
-                        .requestMatchers("/api/coleccionista/**").hasRole("COLECCIONISTA")
+                        .requestMatchers("/api/carrito/**").hasAnyRole("COLECCIONISTA", "VENDEDOR")
+                        .requestMatchers("/api/coleccionista/**").hasAnyRole("COLECCIONISTA", "VENDEDOR")
+                        .requestMatchers("/api/vendedor/**").hasRole("VENDEDOR")
 
                         // Cualquier otra ruta (ej. comentar, ver perfil) requiere estar autenticado
                         .anyRequest().authenticated())

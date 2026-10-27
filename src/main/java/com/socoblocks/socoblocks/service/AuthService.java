@@ -25,7 +25,7 @@ public class AuthService {
     private final BaseMapper<AppUser, UserResponse> mapper;
 
     public UserResponse register(RegisterRequest request) {
-        Role assignedRole = (request.role() != null) ? request.role() : Role.COLECCIONISTA;
+        Role assignedRole = request.role();
 
         if (assignedRole == Role.ADMIN) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rol no permitido");
