@@ -50,7 +50,8 @@ class CartServiceTest {
         // Mismo orden de campos que CartService
         service = new CartService(cartRepository, productRepository, appUserRepository, new CartMapper());
         user = new AppUser(JARED, "hash", Role.COLECCIONISTA);
-        edgar = new Product("La caída de Edgar", new BigDecimal("899.00"), 5);
+        edgar = new Product("La caída de Edgar", new BigDecimal("899.00"), 5,
+                "Set de prueba", "/sets/edgar.png", 500, true, null);
         edgar.setId(1L);
     }
 
